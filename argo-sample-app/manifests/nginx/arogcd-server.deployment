@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: argocd-server
+  namespace: argocd
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: argocd-server
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: argocd-server
+    spec:
+      containers:
+        - name: argocd-server
+          image: argoproj/argocd:v2.5.2  # Replace with the current ArgoCD version
+          args:
+            - argocd-server
+          ports:
+            - containerPort: 8080
+              name: http
+            - containerPort: 443
+              name: https
+          volumeMounts:
+            - name: tls-certs
+              mountPath: /app/config/tls  # Mount TLS certs to this path
+              readOnly: true
+      volumes:
+        - name: tls-certs
+          secret:
+            secretName: argocd-server-tls  # Reference to the secret created with the certificate and key
